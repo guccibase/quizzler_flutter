@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:quizzler/Exam.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() => runApp(Quizzler());
 
@@ -25,6 +27,41 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  List<Widget> _score = [];
+
+  Exam exam = new Exam();
+  int _number = 0;
+
+  _alertDialog() {
+    Alert(
+      context: context,
+      type: AlertType.success,
+      title: "Exam Completed",
+      desc: "Do you want to restart the exam?",
+      buttons: [
+        DialogButton(
+            child: Text(
+              "Yes",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            onPressed: () {
+              setState(() {
+                _score.removeRange(0, 11);
+                _number = 0;
+                Navigator.pop(context);
+                width:
+                120;
+              });
+            })
+      ],
+    ).show();
+  }
+
+  examComplete() {
+    _number == exam.numberOfQuestions() - 1 ? _alertDialog() : _number++;
+    ;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -37,7 +74,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                'This is where the question text will go.',
+                exam.getQuestion(_number),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -61,7 +98,18 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                //The user picked true.
+                setState(() {
+                  exam.getAnswer(_number) == true
+                      ? _score.add(Icon(
+                          Icons.check,
+                          color: Colors.green,
+                        ))
+                      : _score.add(Icon(
+                          Icons.mood_bad,
+                          color: Colors.red,
+                        ));
+                  examComplete();
+                });
               },
             ),
           ),
@@ -80,11 +128,26 @@ class _QuizPageState extends State<QuizPage> {
               ),
               onPressed: () {
                 //The user picked false.
+
+                setState(() {
+                  exam.getAnswer(_number) == false
+                      ? _score.add(Icon(
+                          Icons.check,
+                          color: Colors.green,
+                        ))
+                      : _score.add(Icon(
+                          Icons.mood_bad,
+                          color: Colors.red,
+                        ));
+                  examComplete();
+                });
               },
             ),
           ),
         ),
-        //TODO: Add a Row here as your score keeper
+        Row(
+          children: _score,
+        )
       ],
     );
   }
